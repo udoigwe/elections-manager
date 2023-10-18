@@ -236,6 +236,8 @@ components:
           type: string
         election_title:
           type: string
+        election_status:
+          type: string
         votes:
           type: integer
     loginResponseData:
@@ -753,6 +755,12 @@ paths:
           description: candidate ID (optional)
           schema:
             type: integer
+        - name: election_status
+          in: query
+          required: false
+          description: Election Status (optional)
+          schema:
+            type: string
         - name: page
           in: query
           required: false
