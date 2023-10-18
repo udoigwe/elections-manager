@@ -15,7 +15,7 @@ module.exports = {
 
         const now = Math.floor(Date.now() / 1000); 
         const acceptedMimeTypes = ['image/jpeg', 'image/png', 'image/jpg'];
-        const uploadPath = "public/avatars/";
+        const uploadPath = "public/images/avatars/";
 
         const connection = await util.promisify(db.getConnection).bind(db)();
 
@@ -237,7 +237,7 @@ module.exports = {
         } = req.body;
 
         const acceptedMimeTypes = ['image/jpeg', 'image/png', 'image/jpg'];
-        const uploadPath = "public/avatars/";
+        const uploadPath = "public/images/avatars/";
 
         const connection = await util.promisify(db.getConnection).bind(db)();
 
@@ -332,7 +332,7 @@ module.exports = {
     deleteOne: async (req, res) => {
         const { candidate_id } = req.params;
 
-        const uploadPath = 'public/avatars/';
+        const uploadPath = 'public/images/avatars/';
 
         const connection = await util.promisify(db.getConnection).bind(db)();
 
