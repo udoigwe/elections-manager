@@ -27,19 +27,19 @@ module.exports = {
             for(let i = 0; i < userGroups.length; i++)
             {
                 const userGroup = userGroups[i];
-                userGroup.user_status === "Active" ? activeUsers += 1 : userGroup.user_status === "Inactive" ? inactiveUsers += 1 : null;
+                userGroup.user_status === "Active" ? activeUsers += userGroup.users_count : userGroup.users_count === "Inactive" ? inactiveUsers += 1 : null;
             }
 
             for(let i = 0; i < candidateGroups.length; i++)
             {
                 const candidateGroup = candidateGroups[i];
-                candidateGroup.candidate_status === "Active" ? activeCandidates += 1 : candidateGroup.candidate_status === "Inactive" ? inactiveCandidates += 1 : null;
+                candidateGroup.candidate_status === "Active" ? activeCandidates += 1 : candidateGroup.candidates_count === "Inactive" ? inactiveCandidates += candidateGroup.candidates_count : null;
             }
 
             for(let i = 0; i < electionGroups.length; i++)
             {
                 const electionGroup = electionGroups[i];
-                electionGroup.election_status === "Active" ? activeElections += 1 : electionGroup.election_status === "Inactive" ? inactiveElections += 1 : null;
+                electionGroup.election_status === "Active" ? activeElections += electionGroup.elections_count : electionGroup.election_status === "Inactive" ? inactiveElections += electionGroup.elections_count : null;
             }
 
             const dashboard = {
