@@ -16,6 +16,7 @@ const swaggerJsdoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
 const yaml = require('js-yaml');
 const fs = require('fs');
+const expressLayouts = require('express-ejs-layouts');
 
 //using middlewares
 app.use(cors());
@@ -23,7 +24,17 @@ app.use(express.json());
 app.use(express.urlencoded({extended:true}));
 app.use(useragent.express());
 app.use(fileUpload({useTempFiles: true, limits: { fileSize: 50 * 1024 * 1024 * 1024 }}));
+
+//static files
 app.use(express.static(__dirname + '/public'));
+app.use('/css', express.static(__dirname + '/public/css'));
+app.use('/js', express.static(__dirname + '/public/js'));
+app.use('/vendor', express.static(__dirname + '/public/vendor'));
+
+//set templating engine
+app.use(expressLayouts);
+app.set('layout', './layouts/default.layout')
+app.set('view engine', 'ejs');
 
 //importing all required routes
 const authRoutes = require('./src/routes/auth');
@@ -31,6 +42,9 @@ const electionRoutes = require('./src/routes/election');
 const candidateRoutes = require('./src/routes/candidate');
 const voteRoutes = require('./src/routes/vote');
 const dashboardRoutes = require('./src/routes/dashboard');
+
+//importing all view routes
+const viewRoutes = require('./src/routes/views')
 
 // Parse YAML Swagger documentation to JSON
 const swaggerFile = fs.readFileSync('./src/documentation/swagger.yaml', 'utf8');
@@ -42,6 +56,9 @@ app.use(process.env.ROUTE_PREFIX, electionRoutes);
 app.use(process.env.ROUTE_PREFIX, candidateRoutes);
 app.use(process.env.ROUTE_PREFIX, voteRoutes);
 app.use(process.env.ROUTE_PREFIX, dashboardRoutes);
+
+//using imported view routes
+app.use(viewRoutes);
 
 // Serve Swagger documentation at /api/docs
 app.use(process.env.API_DOCS_ROUTE_PREFIX, swaggerUi.serve);
