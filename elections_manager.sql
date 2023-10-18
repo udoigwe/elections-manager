@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 02, 2023 at 11:37 PM
+-- Generation Time: Oct 18, 2023 at 11:38 PM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -66,7 +66,11 @@ CREATE TABLE `elections` (
 --
 
 INSERT INTO `elections` (`election_id`, `election_title`, `election_slug`, `election_created_at`, `election_status`) VALUES
-(2, 'SUG', 'sug', '1696251155', 'Active');
+(2, 'SUG', 'sug', '1696251155', 'Active'),
+(3, 'Staff Of The Month', 'staff-of-the-month', '1697622010', 'Active'),
+(4, 'Staff Of The Year', 'staff-of-the-year', '1697622076', 'Active'),
+(5, 'Lodge President', 'lodge-president', '1697628780', 'Active'),
+(6, 'Best Dressed', 'best-dressed', '1697632439', 'Active');
 
 -- --------------------------------------------------------
 
@@ -93,9 +97,12 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`user_id`, `user_firstname`, `user_lastname`, `user_email`, `user_ssn`, `enc_password`, `plain_password`, `user_role`, `user_created_at`, `last_logged_in`, `user_status`) VALUES
-(1, 'Jon', 'Snow', 'jonsnow@example.com', '27382-283748-74647', 'U2FsdGVkX1/wQVh80I4774cf5b69rVLRMJhgZ0qoiLY=', 'strongpass', 'Admin', '1696238351', '1696282393', 'Active'),
+(1, 'Jon', 'Snow', 'jonsnow@example.com', '27382-283748-74647', 'U2FsdGVkX1/wQVh80I4774cf5b69rVLRMJhgZ0qoiLY=', 'strongpass', 'Admin', '1696238351', '1697663704', 'Active'),
 (2, 'Tony', 'Jaa', 'tonyjaa@example.com', '2732-288-74647', 'U2FsdGVkX1/PSD1rqW/+5mGP2joQUkuWwqBqJk2y9Eo=', 'strongpass', 'Voter', '1696261677', '1696261694', 'Active'),
-(3, 'Beyonce', 'Knowles', 'beyounceknowles@example.com', '27382-283748-72647', 'U2FsdGVkX1+W1BYasgR3vqc04L0243EO2UEuobz27gk=', 'strongpass', 'Voter', '1696263884', '1696263902', 'Active');
+(3, 'Beyonce', 'Knowles', 'beyounceknowles@example.com', '27382-283748-72647', 'U2FsdGVkX1+W1BYasgR3vqc04L0243EO2UEuobz27gk=', 'strongpass', 'Voter', '1696263884', '1696263902', 'Active'),
+(4, 'Mel', 'Gibson', 'melgibson@example.com', '87892-897892-8980', 'U2FsdGVkX1/kKSSTojKQw5vgeC4llKY8lgRJ5R7gzt8=', 'strongpass', 'Voter', '1697663524', '', 'Active'),
+(5, 'Arnorl', 'Swazneggar', 'arnold@example.com', '84748-2828224-24824', 'U2FsdGVkX19v0JlmiIoMfOChqXKi4GkNKQ0TE7DGJ5w=', 'strongpass', 'Voter', '1697663613', '', 'Active'),
+(6, 'Michael', 'Carrick', 'michaelcarrick@example.com', '8989-2829-293', 'U2FsdGVkX1/yomujDdV8Gvtm1Qms9L7OAAm2F4BhfrY=', 'strongpass', 'Voter', '1697663699', '', 'Active');
 
 -- --------------------------------------------------------
 
@@ -168,13 +175,13 @@ ALTER TABLE `candidates`
 -- AUTO_INCREMENT for table `elections`
 --
 ALTER TABLE `elections`
-  MODIFY `election_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `election_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `user_id` int(1) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `user_id` int(1) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `votes`
