@@ -262,6 +262,7 @@ module.exports = {
     readRanks: async (req, res) => {
         const {
             election_id,
+            election_status,
             candidate_id
         } = req.query;
 
@@ -276,6 +277,7 @@ module.exports = {
                 a.election_id, 
                 b.candidate_fullname, 
                 c.election_title, 
+                c.election_status,
                 COUNT(*) AS entry_count 
                 FROM votes a 
                 LEFT JOIN candidates b ON a.candidate_id = b.candidate_id 
@@ -283,7 +285,8 @@ module.exports = {
                 GROUP BY a.candidate_id, 
                 a.election_id, 
                 b.candidate_fullname, 
-                c.election_title 
+                c.election_title,
+                c.election_status
                 ORDER BY entry_count DESC 
             ) ranked, (SELECT @rank := 0) r
             WHERE 1 = 1
@@ -300,6 +303,7 @@ module.exports = {
                     a.election_id, 
                     b.candidate_fullname, 
                     c.election_title, 
+                    c.election_status,
                     COUNT(*) AS entry_count 
                     FROM votes a 
                     LEFT JOIN candidates b ON a.candidate_id = b.candidate_id 
@@ -307,7 +311,8 @@ module.exports = {
                     GROUP BY a.candidate_id, 
                     a.election_id, 
                     b.candidate_fullname, 
-                    c.election_title 
+                    c.election_title,
+                    c.election_status 
                     ORDER BY entry_count DESC 
                 ) ranked, (SELECT @rank := 0) r
             ) X WHERE 1 = 1
@@ -322,6 +327,15 @@ module.exports = {
 
             query2 += " AND election_id = ?";
             queryParams2.push(election_id);
+        }
+
+        if(election_status)
+        {
+            query += " AND election_status = ?";
+            queryParams.push(election_status);
+
+            query2 += " AND election_status = ?";
+            queryParams2.push(election_status);
         }
 
         if(candidate_id)
