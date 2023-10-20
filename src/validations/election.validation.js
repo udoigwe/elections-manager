@@ -12,7 +12,10 @@ module.exports = {
             .withMessage("Election ID is required"),
         body("election_title")
             .exists({ checkFalsy: true })
-            .withMessage("Election Title is required")
+            .withMessage("Election Title is required"),
+        body("election_status")
+            .exists({ checkFalsy: true })
+            .withMessage("Election Status is required")
     ],
     readOne: [
         param("election_id")

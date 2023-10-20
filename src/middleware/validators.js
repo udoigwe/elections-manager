@@ -3,6 +3,7 @@ const authValidations = require('../validations/auth.validation');
 const electionValidations = require('../validations/election.validation');
 const candidateValidations = require('../validations/candidate.validation');
 const voteValidations = require('../validations/vote.validation');
+const userValidations = require('../validations/user.validation');
 
 module.exports = {
     /* Auth route validators */
@@ -24,4 +25,10 @@ module.exports = {
     /* Vote route validators */
     createVote: validate(voteValidations.create),
     readSingleVote: validate(voteValidations.readOne),
+
+    /* User route validators */
+    createUser: validate(userValidations.create),
+    readSingleUser: validate(userValidations.readOne),
+    updateUser: validate(userValidations.update),
+    deleteOneUser: validate(userValidations.deleteOne),
 }

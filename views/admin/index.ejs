@@ -22,8 +22,42 @@
                             <form id="new-election">
                                 <div class="form-group">
                                     <label class="text-black font-w500">Election Title</label>
-                                    <input type="text" id="election-title" name="election_title" class="form-control">
+                                    <input type="text" id="election-title" name="election_title" class="form-control required">
                                 </div>                                
+                            
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-danger light" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Save changes</button>
+                        </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <!-- Update Election -->
+            <div class="modal fade" id="updateElectionModal">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title"></h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal">
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="update-election">
+                                <div class="form-group">
+                                    <label class="text-black font-w500">Election Title</label>
+                                    <input type="text" id="election-title" name="election_title" class="form-control required">
+                                    <input type="hidden" id="election-id" name="election_id" class="required"/>
+                                </div> 
+                                <div class="form-group">
+                                    <label class="text-black font-w500">Election Status</label>
+                                    <select id="election-status" name="election_status" class="default-select form-control wide required">
+                                        <option selected>Choose...</option>
+                                        <option value="Active">Active</option>
+                                        <option value="Inactive">Inactive</option>
+                                    </select>
+                                </div>                               
                             
                         </div>
                         <div class="modal-footer">
@@ -116,7 +150,7 @@
                                     <h4 class="text-black fs-24 font-w700">Polls</h4>
                                 </div>
                                 <div class="d-flex align-items-center justify-content-between polls">
-                                    <select class="form-control style-1 me-3 elections-select"></select>
+                                    <select class="form-control style-1 me-3 elections-dropdown"></select>
                                 </div>
                             </div>
                             
