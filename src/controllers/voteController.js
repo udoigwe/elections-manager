@@ -25,8 +25,8 @@ module.exports = {
             const electionQueryParams = [ election_id ];
 
             //check if candidate exists
-            const candidateQuery = "SELECT * FROM candidates WHERE candidate_id = ? LIMIT 1";
-            const candidateQueryParams = [ candidate_id ];
+            const candidateQuery = "SELECT * FROM candidates WHERE candidate_id = ? AND election_id = ? LIMIT 1";
+            const candidateQueryParams = [ candidate_id, election_id ];
 
             //check if voter has voted for this election
             let query = "SELECT * FROM votes WHERE voter_id = ? AND election_id = ?";
@@ -64,11 +64,6 @@ module.exports = {
             if(candidates[0].candidate_status === "Inactive")
             {
                 throw new Error("Your preffered candidate is currently disqualified");
-            }
-
-            if(candidates[0].election_id !== election_id)
-            {
-                throw new Error("Your preffered candidate is not contesting in this election")
             }
 
             if(votes.length > 0)
