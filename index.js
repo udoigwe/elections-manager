@@ -30,6 +30,7 @@ app.use(express.static(__dirname + '/public'));
 app.use('/css', express.static(__dirname + '/public/css'));
 app.use('/js', express.static(__dirname + '/public/js'));
 app.use('/vendor', express.static(__dirname + '/public/vendor'));
+app.use('/images', express.static(__dirname + '/public/images'));
 
 //set templating engine
 app.use(expressLayouts);
@@ -42,6 +43,7 @@ const electionRoutes = require('./src/routes/election');
 const candidateRoutes = require('./src/routes/candidate');
 const voteRoutes = require('./src/routes/vote');
 const dashboardRoutes = require('./src/routes/dashboard');
+const userRoutes = require('./src/routes/user');
 
 //importing all view routes
 const viewRoutes = require('./src/routes/views')
@@ -56,6 +58,7 @@ app.use(process.env.ROUTE_PREFIX, electionRoutes);
 app.use(process.env.ROUTE_PREFIX, candidateRoutes);
 app.use(process.env.ROUTE_PREFIX, voteRoutes);
 app.use(process.env.ROUTE_PREFIX, dashboardRoutes);
+app.use(process.env.ROUTE_PREFIX, userRoutes);
 
 //using imported view routes
 app.use(viewRoutes);
