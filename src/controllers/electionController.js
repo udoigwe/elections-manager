@@ -52,7 +52,8 @@ module.exports = {
         const { election_id } = req.params;
 
         const {
-            election_title
+            election_title,
+            election_status
         } = req.body;
 
         const connection = await util.promisify(db.getConnection).bind(db)();
@@ -72,10 +73,11 @@ module.exports = {
 
             //update election
             await util.promisify(connection.query).bind(connection)(`
-                UPDATE elections SET election_title = ?, 
+                UPDATE elections SET election_title = ?,
+                election_status = ?, 
                 election_slug = ?
                 WHERE election_id = ?
-            `, [election_title, electionSlug, election_id]);
+            `, [election_title, election_status, electionSlug, election_id]);
 
             res.json({
                 error: false,
@@ -83,7 +85,7 @@ module.exports = {
             })
         }
         catch(e)
-        {console.log(e.stack)
+        {
             res.json({
                 error:true,
                 message:e.message
