@@ -3,9 +3,6 @@ $(function () {
     'use strict';
 
 	$(document).ready(function($) {
-
-        //check if user is already logged in
-        //loggedinCheck();
         //remember me
         rememberMe();
         //login
@@ -20,7 +17,6 @@ $(function () {
             e.preventDefault();
             var form = $(this);
             var email = $("#email").val();
-            var password = $("#password").val();
             var fields = form.find('input.required, select.required');
             
             blockUI();
@@ -58,7 +54,7 @@ $(function () {
                         {
                             var token = response.token; //generated access token from request
                             var role = payloadClaim(token, "user_role"); //the user section from access token
-                            var redirectTo = role === 'Admin' ? '/admin/dashboard' : role === "Voter" ? '/voter' : '/observer';
+                            var redirectTo = role === 'Admin' ? '/admin/dashboard' : role === "Voter" ? '/voter/dashboard' : '/observer';
 
                             setRememberMe(); //store login details to hardrive if any
                             sessionStorage.setItem('token', token); //set access token 
@@ -150,74 +146,4 @@ $(function () {
             });
         });
     }
-
-    function loadStates()
-    {
-        $.getJSON( "assets/js/nigeria-state-and-lgas.json", function( data ) {
-            var html = `<option value="">Please select</option>`;
-            
-            $.each( data, function( key, val ) {
-                html += `<option value="${data[key].state}">${data[key].state}</option>`;
-            });
-
-            $('.state').html(html);
-            $('.state').niceSelect('update');
-        });
-    }
-
-    function onchangeState()
-    {
-        $('.state').on('change', function(){
-            var parentForm = $(this).parents('form');
-            var value = $(this).val();
-            
-            if(value !== '')
-            {
-                $.getJSON( "assets/js/nigeria-state-and-lgas.json", function( data ) {
-                    var html = `<option value="">Please select</option>`;
-                    var stateKey;
-
-                    for (let i = 0; i < data.length; i++)
-                    {
-                        if(data[i].state === value)
-                        {
-                            stateKey = i;
-                            break;
-                        }
-                    }
-                    
-                    $.each( data[stateKey].lgas, function( key, val ) {
-
-                        html += `<option value="${val}">${val}</option>`;
-                    });
-
-                    parentForm.find('.lg').html(html);
-                    parentForm.find('.lg').niceSelect('update');
-                });
-            }
-            else
-            {
-                parentForm.find('.lg').html(`<option value="">Local Government</option>`);
-                parentForm.find('.lg').niceSelect('update');
-            }
-        });
-    }
-
-    /*function onUserRoleChange()
-    {
-        $('#user_role').on('change', function(){
-            var userRole = $(this).val();
-            
-            if(userRole == "Customer")
-            {
-                $('.applicant-div').slideUp(1000);
-                $('.applicant-div').find('.required').removeClass('required');
-            }
-            else
-            {
-                $('.applicant-div').slideDown(1000);
-                $('.applicant-div').find('#next_of_kin, #next_of_kin_phone').addClass('required');
-            }
-        });
-    }*/
 }); 

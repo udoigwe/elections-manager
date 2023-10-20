@@ -5,208 +5,20 @@ $(function () {
 
 	$(document).ready(function(){
 
-        newElection();
-
-		updateElection()
-
-        dashboard();
-
 		pollsCharts();
 
 		handleChangeElection();
 
 		loadElections();
 
-		loadElection();
+        loadCandidates();
 
-		deleteElection();
+        loadBio();
+
+        vote();
+
+        loadMyVotes();
 	});
-
-    function newElection()
-    {
-        $('#new-election').on('submit', function(e){
-            e.preventDefault();
-            var form = $(this);
-            var fields = form.find('input.required, select.required');
-
-            $('#addOrderModal').find('.btn-close').click();
-            
-            blockUI();
-
-            for(var i=0;i<fields.length;i++)
-            {
-                if(fields[i].value === "")
-                {
-                    /*alert(fields[i].id)*/
-                    unblockUI();
-                    showSimpleMessage("Attention", `${fields[i].name} is required`, "error");
-                    $('#'+fields[i].id).focus();
-                    return false;
-                }
-            }
-            
-            $.ajax({
-                type: 'POST',
-                url: API_URL_ROOT+'/elections',
-                data: JSON.stringify(form.serializeObject()),
-                dataType: 'json',
-                contentType: 'application/json',
-                headers:{'x-access-token':token},
-                success: function(response)
-                {
-                    if(response.error === false)
-                    {
-                        showSimpleMessage("Success", response.message, "success");
-                        window.location.reload();
-                        unblockUI();
-                    }
-                    else
-                    {
-                        showSimpleMessage("Attention", response.message, "error");
-                        unblockUI();
-                    }
-                },
-                error: function(req, status, err)
-                {
-                    showSimpleMessage("Attention", "ERROR - "+req.status+" : "+req.responseText, "error");
-                    unblockUI();
-                }
-            });
-        });
-    }
-
-	function updateElection()
-    {
-        $('#update-election').on('submit', function(e){
-            e.preventDefault();
-            var form = $(this);
-			var electionID = form.find('#election-id').val();
-            var fields = form.find('input.required, select.required');
-
-            $('#updateElectionModal').find('.btn-close').click();
-            
-            blockUI();
-
-            for(var i=0;i<fields.length;i++)
-            {
-                if(fields[i].value === "")
-                {
-                    /*alert(fields[i].id)*/
-                    unblockUI();
-                    showSimpleMessage("Attention", `${fields[i].name} is required`, "error");
-                    $('#'+fields[i].id).focus();
-                    return false;
-                }
-            }
-            
-            $.ajax({
-                type: 'PUT',
-                url: `${API_URL_ROOT}/elections/${electionID}`,
-                data: JSON.stringify(form.serializeObject()),
-                dataType: 'json',
-                contentType: 'application/json',
-                headers:{'x-access-token':token},
-                success: function(response)
-                {
-                    if(response.error === false)
-                    {
-                        showSimpleMessage("Success", response.message, "success");
-                        window.location.reload();
-                        unblockUI();
-                    }
-                    else
-                    {
-                        showSimpleMessage("Attention", response.message, "error");
-                        unblockUI();
-                    }
-                },
-                error: function(req, status, err)
-                {
-                    showSimpleMessage("Attention", "ERROR - "+req.status+" : "+req.responseText, "error");
-                    unblockUI();
-                }
-            });
-        });
-    }
-
-	async function deleteElection()
-	{
-		$('#elections').on('click', '.btn-delete', async function(){
-
-			swal({
-                title: "Attention",
-                text: "Are you sure you want to delete this election?",
-                type: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#DD6B55",
-                confirmButtonText: "Yes!",
-                cancelButtonText: "No!"
-                /*closeOnConfirm: false,
-                closeOnCancel: false*/
-            }).then(async function(result){
-
-				if(result.value)
-				{
-					const electionID = $(this).attr('data-id');
-					
-					blockUI();
-		
-					try
-					{
-						const response = await $.ajax({
-							url: `${API_URL_ROOT}/elections/${electionID}`,
-							method: 'DELETE',
-							dataType: 'json',
-							headers:{'x-access-token':token},
-						});
-		
-						showSimpleMessage("Success", response.message, "success");
-						window.location.reload();
-						unblockUI();
-					}
-					catch(e)
-					{
-						console.log(e.message);
-						unblockUI();
-					}
-				}
-				else
-				{
-					showSimpleMessage('Canceled', 'Process Abborted', 'error');
-				}
-			})
-		})
-	}
-
-	function dashboard()
-	{
-		$.ajax({
-			type:'GET',
-			url:`${API_URL_ROOT}/dashboard`,
-			dataType:'json',
-			headers:{'x-access-token':token},
-			success:function(response)
-			{
-				if(response.error === false)
-				{
-					var dashboard = response.dashboard;
-
-					$('.active-users').text(formatNumber(parseInt(dashboard.activeUsers) || 0));
-					$('.active-elections').text(formatNumber(parseInt(dashboard.activeElections) || 0));
-					$('.active-candidates').text(formatNumber(parseInt(dashboard.activeCandidates) || 0));
-					$('.total-votes').text(formatNumber(parseInt(dashboard.total_votes) || 0));
-				}
-				else
-				{
-					showSimpleMessage("Attention", response.message, "error");
-				}
-			},
-			error:function(req, err, status)
-			{
-				showSimpleMessage("Attention", "ERROR - "+req.status+" : "+req.statusText, "error");
-			}
-		})
-	}
 
     async function pollsCharts()
     {
@@ -258,7 +70,7 @@ $(function () {
 				}
 			}
 
-            $('.elections-dropdown').html(html);
+           $('.elections-dropdown').html(html);
 
 			setTimeout(function() {
 				$('.elections-dropdown').addClass('default-select');
@@ -544,12 +356,162 @@ $(function () {
 			});
 		})
 	}
+    
+    function loadCandidates()
+	{
+		$('.elections-list').on('change', async function(){
+			const electionID = $(this).val();
+			
+            let html = '';
+
+            if(electionID !== "")
+            {
+                //get the selected election candidates
+                const response = await $.ajax({
+                    url: `${API_URL_ROOT}/candidates?candidate_status=Active&election_id=${electionID}`,
+                    method: 'GET',
+                    dataType: 'json',
+                    headers:{'x-access-token':token},
+                });
+    
+                const candidates = response.data;
+    
+                for(let i = 0; i < candidates.length; i++)
+                {
+                    const candidate = candidates[i];
+    
+                    html += `
+                        <div class="col-xl-3 col-xxl-3 col-md-4 col-sm-6">
+                            <div class="card">
+                                <div class="card-body product-grid-card">
+                                    <div class="new-arrival-product">
+                                        <div class="new-arrivals-img-contnent">
+                                            <img class="img-fluid" src="${API_HOST_NAME}/images/avatars/${candidate.candidate_avatar}" alt="${candidate.candidate_fullname}">
+                                        </div>
+                                        <div class="new-arrival-content text-center mt-3">
+                                            <h4>${candidate.candidate_fullname}</h4>
+                                            <button type="button" class="btn btn-info btn-rounded btn-bio light" data-bs-toggle="modal" data-bs-target="#bioModal" data-id="${candidate.candidate_id}">Bio</button>
+                                            <button type="submit" class="btn btn-success btn-rounded btn-vote light" data-id="${candidate.candidate_id}">Vote</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `
+                } 
+
+                $('.candidate-list').html(html)
+            }
+            else
+            {
+                $('.candidate-list').html("")
+            }
+		})
+	}
+
+    function loadBio()
+    {
+        $('.candidate-list').on('click', '.btn-bio', async function(){
+			const candidateID = $(this).attr('data-id');
+            const bioModal = $('#bioModal');
+			
+            //get the selected candidate's info
+            const response = await $.ajax({
+                url: `${API_URL_ROOT}/candidates/${candidateID}`,
+                method: 'GET',
+                dataType: 'json',
+                headers:{'x-access-token':token},
+            });
+    
+            if(response.error === false)
+            {
+                const candidate = response.candidate;
+
+                bioModal.find('.modal-title').text(candidate.candidate_fullname);
+                bioModal.find('.modal-body').text(candidate.candidate_bio);
+            }
+            else
+            {
+                bioModal.find('.modal-body').text("");
+            }
+		}) 
+    }
+
+    function vote()
+    {
+        $('.candidate-list').on('click', '.btn-vote', async function(){
+
+            const candidate_id = $(this).attr('data-id');
+            const election_id = $('.elections-list').find('option:selected').val();
+
+            console.log({election_id, candidate_id})
+
+            swal({
+                title: "Attention",
+                text: "Are you sure you want to vote this candidate? Your selection will be irreversible",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Yes!",
+                cancelButtonText: "No!"
+                /*closeOnConfirm: false,
+                closeOnCancel: false*/
+            }).then(function(result){
+    
+                if (result.value) 
+                {
+                    //name vairables
+    
+                    blockUI();
+
+                    if(!election_id || !candidate_id)
+                    {
+                        unblockUI();
+                        showSimpleMessage("Attention", "Invalid Request", "error");
+                        return false;
+                    }
+                        
+                    $.ajax({
+                        type: 'POST',
+                        url: `${API_URL_ROOT}/votes`,
+                        data: JSON.stringify({election_id, candidate_id}),
+                        dataType: 'json',
+                        contentType: 'application/json',
+                        headers:{'x-access-token':token},
+                        success: function(response)
+                        {
+                            if(response.error == false)
+                            {
+                                unblockUI();
+                                showSimpleMessage("Success", response.message, "success");
+                                window.location.reload();
+                            }
+                            else
+                            {
+                                unblockUI();
+                                showSimpleMessage("Attention", response.message, "error");
+                            }   
+                        },
+                        error: function(req, status, error)
+                        {
+                            unblockUI();
+                            showSimpleMessage("Attention", "ERROR - "+req.status+" : "+req.responseText, "error");
+                        }
+                    });
+                } 
+                else 
+                {
+                    showSimpleMessage('Canceled', 'Process Abborted', 'error');
+                }
+            });
+		}) 
+    }
 
 	async function loadElections()
 	{
 		//fetch all active elections
 		const response = await $.ajax({
-			url: `${API_URL_ROOT}/elections`,
+			url: `${API_URL_ROOT}/elections?election_status=Active`,
 			method: 'GET',
 			dataType: 'json',
 			headers:{'x-access-token':token},
@@ -557,67 +519,80 @@ $(function () {
 
 		const elections = response.data;
 		let html = '';
-		let serial = 1;
 
 		for(let i=0; i < elections.length; i++) 
 		{
 			const election = elections[i];
 
 			html += `
-				<tr>
-					<td>${serial}</td>
-					<td>${election.election_title}</td>
-					<td>${moment.unix(election.election_created_at).format('MMMM Do YYYY, h:mm:ss a')}</td>
-					<td>${election.election_status}</td>
-					<td>
-						<div class="d-flex">
-							<a href="javascript:void(0)" class="btn btn-primary shadow btn-xs sharp me-1 btn-edit" data-id="${election.election_id}" data-bs-toggle="modal" data-bs-target="#updateElectionModal"><i class="fa fa-pencil"></i></a>
-							<a href="javascript:void(0)" class="btn btn-danger shadow btn-xs sharp btn-delete" data-id="${election.election_id}"><i class="fa fa-trash"></i></a>
-						</div>												
-					</td>
-				</tr>
+                <option value="${election.election_id}">${election.election_title}</option>
 			`;
-
-			serial++;
 		}
+        
+        $('.elections-select').append(html);
 
-		$('#elections tbody').html(html);
-		$('#elections').DataTable({
-			columnDefs: [
-                { orderable: false, targets: [1,2,3,4] }
+        setTimeout(function() {
+            $('.elections-select').addClass('default-select');
+            $('.elections-select').selectpicker();
+        }, 1000);
+	}
+
+    //load my votes
+    function loadMyVotes()
+    {
+        var table = $('#my-votes');
+        var userID = payloadClaim(token, 'user_id');
+
+        table.DataTable({
+            lengthMenu: [7, 10, 20, 50, 100, 500, 1000],
+            stripeClasses: [],
+            drawCallback: function () { $('.dataTables_paginate > .pagination').addClass(' pagination-style-13 pagination-bordered mb-5'); },
+            language: {
+                infoEmpty: "<span style='color:red'><b>No records found</b></span>"
+            },
+            processing: true,
+            serverSide: false,
+            destroy: true,
+            autoWidth: false,
+            pageLength: 100,
+            ajax: {
+                type: 'GET',
+                url: `${API_URL_ROOT}/votes?voter_id=${userID}`,
+                dataType: 'json',
+                headers:{'x-access-token':token},
+                async: true,
+                error: function(xhr, error, code)
+                {
+                    console.log(xhr);
+                    console.log(code);
+                }
+            },
+            columnDefs: [
+                { orderable: false, targets: [1, 2, 3,4,5,6] }
             ],
-		});
-	}
-
-	async function loadElection()
-	{
-		$('#elections').on('click', '.btn-edit', async function(){
-			const electionID = $(this).attr('data-id');
-			
-			blockUI();
-
-			try
-			{
-				const response = await $.ajax({
-					url: `${API_URL_ROOT}/elections/${electionID}`,
-					method: 'GET',
-					dataType: 'json',
-					headers:{'x-access-token':token},
-				});
-
-				const election = response.election;
-
-				$('#updateElectionModal .modal-title').text(election.election_title)
-				$('#updateElectionModal').find('#election-title').val(election.election_title);
-				$('#updateElectionModal').find('#election-id').val(election.election_id);
-				$('#updateElectionModal').find('#election-status').selectpicker('val', election.election_status);
-
-				unblockUI();
-			}
-			catch(e)
-			{
-				console.log(e.message);
-			}
-		})
-	}
+            order: [[0, "asc"]],
+            columns: [
+                {
+                    data: 'vote_id',
+                    render: function (data, type, row, meta) 
+                    {
+                        return meta.row + meta.settings._iDisplayStart + 1;
+                    }
+                },
+                {data: 'election_title'},
+                {data: 'candidate_fullname'},
+                {data: 'voter_name'},
+                {
+                    data: 'vote_timestamp',
+                    render: function(data, type, row, meta)
+                    {
+                        var createdAt = moment.unix(data).format('MMMM Do YYYY, h:mm:ss a');
+                        return createdAt;
+                    }
+                },
+                {data: 'ip_address'},
+                {data: 'user_agent'}
+            ] 
+        });
+    }
 });
