@@ -258,57 +258,59 @@ module.exports = {
             {
                 throw new Error("The provided election does not exist")
             }
-            
-            if(!req.files || !req.files.avatar)
-            {
-                throw new Error("No image file uploaded");
-            }
 
             const candidate = candidates[0];
             const currentAvatarPath = uploadPath + candidate.candidate_avatar;
 
-            const file = req.files.avatar;
-            const filename = file.name;
-            const fileMimeType = file.mimetype;
-            const filePath = file.tempFilePath; // Get the temp file path
-            const extensionPosition = filename.lastIndexOf('.');
-            const extension = filename.substr(extensionPosition).toLowerCase();
-            const newFileName = uuidv4() + extension;
+            let updateQuery = "UPDATE candidates SET election_id = ?, candidate_fullname = ?, candidate_bio = ?";
+            let updateQueryParams = [ election_id, candidate_fullname, candidate_bio ];
 
-            if(acceptedMimeTypes.indexOf(fileMimeType) === -1)
+            if(req.files && req.files.avatar)
             {
+                const file = req.files.avatar;
+                const filename = file.name;
+                const fileMimeType = file.mimetype;
+                const filePath = file.tempFilePath; // Get the temp file path
+                const extensionPosition = filename.lastIndexOf('.');
+                const extension = filename.substr(extensionPosition).toLowerCase();
+                const newFileName = uuidv4() + extension;
+                
+                if(acceptedMimeTypes.indexOf(fileMimeType) === -1)
+                {
+                    await fs.unlink(filePath);
+    
+                    throw new Error('File attachment must be a jpg or png file');
+                }
+                
+                if(file.size > (1024 * 1024))
+                {
+                    await fs.unlink(filePath);
+    
+                    throw new Error('File attachment must not be more than 1MB in size');
+                }
+                
+                if(FS.existsSync(currentAvatarPath))
+                {
+                    //delete current avatar file
+                    await fs.unlink(currentAvatarPath);
+                }
+    
+                //upload image avatar
+                await sharp(filePath).resize({height:200, width:200, fit:'cover'}).toFile(uploadPath + newFileName);
+    
+                //delete filepath
                 await fs.unlink(filePath);
 
-                throw new Error('File attachment must be a jpg or png file');
-            }
-            
-            if(file.size > (1024 * 1024))
-            {
-                await fs.unlink(filePath);
-
-                throw new Error('File attachment must not be more than 1MB in size');
+                //update the query string
+                updateQuery += `, candidate_avatar = ?`;
+                updateQueryParams.push(newFileName);
             }
 
-            if(FS.existsSync(currentAvatarPath))
-            {
-                //delete current avatar file
-                await fs.unlink(currentAvatarPath);
-            }
-
-            //upload image avatar
-            await sharp(filePath).resize({height:200, width:200, fit:'cover'}).toFile(uploadPath + newFileName);
-
-            //delete filepath
-            await fs.unlink(filePath);
+            updateQuery += ` WHERE candidate_id = ?`;
+            updateQueryParams.push(candidate_id);
 
             //update candidate
-            await util.promisify(connection.query).bind(connection)(`
-                UPDATE candidates SET election_id = ?, 
-                candidate_fullname = ?, 
-                candidate_bio = ?, 
-                candidate_avatar = ? 
-                WHERE candidate_id = ?
-            `, [ election_id, candidate_fullname, candidate_bio, newFileName, candidate_id ]);
+            await util.promisify(connection.query).bind(connection)(updateQuery, updateQueryParams);
 
             res.json({
                 error: false,
@@ -372,5 +374,4 @@ module.exports = {
             connection.release();
         }
     }
-
 }
